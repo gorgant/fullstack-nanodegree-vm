@@ -1,15 +1,26 @@
 # "Database code" for the DB Forum.
 
-import datetime
+import datetime, psycopg2
 
-POSTS = [("This is the first post.", datetime.datetime.now())]
+POSTS = []
 
 def get_posts():
   """Return all posts from the 'database', most recent first."""
-  return reversed(POSTS)
+  db = psycopg2.connect("dbname=forum")
+  c = db.cursor()
+  query = "SELECT content, time FROM posts ORDER BY time DESC"
+  c.execute(query)
+  rows = c.fetchall()
+  POSTS = rows
+  db.close()
+  return POSTS
 
 def add_post(content):
-  """Add a post to the 'database' with the current timestamp."""
   POSTS.append((content, datetime.datetime.now()))
-
-
+  """Add a post to the 'database' with the current timestamp."""
+  sql = """INSERT INTO posts(content) VALUES(%s);"""
+  db = psycopg2.connect("dbname=forum")
+  c = db.cursor()
+  c.execute(sql,(content,))
+  db.commit()
+  db.close()

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-# 
+#
 # A buggy web service in need of a database.
 
 from flask import Flask, request, redirect, url_for
 
 from forumdb import get_posts, add_post
+
+import bleach
 
 app = Flask(__name__)
 
@@ -54,7 +56,8 @@ def main():
 def post():
   '''New post submission.'''
   message = request.form['content']
-  add_post(message)
+  better_message = bleach.clean(message)
+  add_post(better_message)
   return redirect(url_for('main'))
 
 
